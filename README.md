@@ -8,18 +8,18 @@
 ## 想法和设计
 
 - 考虑到最短的k-v: 
-  - key_size: 4bytes, space: 1bytes, key: 1bytes, space: 1bytes;
-  - val_size: 4bytes, space: 1bytes, value: 1bytes, space: 1bytes;
-  - 一共14byte。
-  - 在1T的文件里面最多有78,536,544,841个k-v。
+  - key_size: 1bytes, space: 1bytes, key: 1bytes, space: 1bytes;
+  - val_size: 1bytes, space: 1bytes, value: 1bytes, space: 1bytes;
+  - 一共8byte。
+  - 在1T的文件里面最多有128G个k-v。
 
 - 考虑对文件分块，分成1024块，每块1Gbytes，或者是2048块，每块512Mbytes。
 
 - 建立简单的哈希表，维护新的键值对new_k-v：(key: uint64, value: uint64)，或者(key:uint32, value:uint32)，其中key是文件中key的哈希值，value是该k-v的文件偏移量。
   - 考虑32位系统，一个哈希表包括哈希桶和链表构成。
-  - 一个链表节点指针是4bytes, value是4bytes，一共8bytes。一个桶中key是4bytes，链表头指针节点是4bytes。
-  - 所以这些复合结构都是8bytes一个单元，所以如果使用桶的数量是0x80000000u，且每0x00080000个桶放到一个文件中，一共4096个桶，使用BKDR Hash算法尽可能保证均匀。
-  - 平均每个文件会放19,173,961个new_k-v，一共146Mbytes。
+  - 一个链表节点指针是4bytes, value是4bytes，一共8bytes。一个桶中链表头指针节点是4bytes。
+  - 所以如果使用桶的数量是0x10000000u，且每0x00080000个桶放到一个文件中，一共256个文件，使用BKDR Hash算法尽可能保证均匀。
+  - 平均一个文件512Mbytes。
   - 以上策略也可以调整参数获得最优情况（比如说按照CPU的Cache还有页表大小啥的调参）。
 
 - 具体的算法：
