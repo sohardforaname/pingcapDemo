@@ -33,7 +33,7 @@ struct KeyNode {
 };
 
 static const size_t bucketSize = 1 << 23;
-static const size_t blockSize = 1 << 23;
+static const size_t blockSize = 1 << 21;
 
 static char pathBuffer[20];
 
@@ -56,16 +56,14 @@ private:
 
     void LoadFileBlock(const off_t fileOffset)
     {
-        assert(hashTableFilePtr);
-        fseek(hashTableFilePtr, fileOffset & (~(bucketSize - 1)), SEEK_SET);
+        fseek(hashTableFilePtr, fileOffset & (~(blockSize - 1)), SEEK_SET);
 
         fread(buffer.get(), elementSize, blockSize, hashTableFilePtr);
     }
 
     void WriteFileBlock(const off_t fileOffset)
     {
-        assert(hashTableFilePtr);
-        fseek(hashTableFilePtr, fileOffset & (~(bucketSize - 1)), SEEK_SET);
+        fseek(hashTableFilePtr, fileOffset & (~(blockSize - 1)), SEEK_SET);
 
         fwrite(buffer.get(), elementSize, blockSize, hashTableFilePtr);
     }
@@ -73,21 +71,21 @@ private:
     void GetHashNodeFromFile(const off_t fileOffset, HashTableLinkListNode& node)
     {
         LoadFileBlock(fileOffset);
-        off_t offset = fileOffset & (bufferSize - 1);
+        off_t offset = fileOffset & (blockSize - 1);
         memcpy(&node, buffer.get() + offset, sizeof(HashTableLinkListNode));
     }
 
     void SetHashNodeToFile(const off_t fileOffset, HashTableLinkListNode& node)
     {
         LoadFileBlock(fileOffset);
-        off_t offset = fileOffset & (bufferSize - 1);
+        off_t offset = fileOffset & (blockSize - 1);
         memcpy(buffer.get() + offset, &node, sizeof(HashTableLinkListNode));
         WriteFileBlock(fileOffset);
     }
 
     std::pair<HashTableLinkListNode, off_t> FindNode(const std::string& key)
     {
-        size_t hashValue = BKDRHash(key.c_str()) % bufferSize;
+        size_t hashValue = BKDRHash(key.c_str()) % bucketSize;
         off_t curPtr = (bucket.get())[hashValue];
         while (curPtr != -1) {
 
@@ -123,7 +121,7 @@ public:
                 SetHashNodeToFile(Iter.second, Iter.first);
             } else {
                 HashTableLinkListNode node = { keyNode.fileOffset, bucket.get()[keyNode.hashValue % bucketSize] };
-                off_t offset = bufferSize * sizeof(off_t) + Size * sizeof(HashTableLinkListNode);
+                off_t offset = bucketSize * sizeof(off_t) + Size * sizeof(HashTableLinkListNode);
                 SetHashNodeToFile(offset, node);
 
                 bucket.get()[keyNode.hashValue % bucketSize] = offset;
@@ -152,5 +150,8 @@ public:
         }
     }
 
-    ~HashTable() {}
+    ~HashTable()
+    {
+        fclose(hashTableFilePtr);
+    }
 };
