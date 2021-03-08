@@ -54,3 +54,7 @@
 ## 补充
 
 查资料的时候忘记了cppreference这玩意了，就去查了一下cppreference，好家伙，这才发现ftell要和fseek配套使用，或者是二进制文件，否则是UB，同理fgetpos也要和fsetpos配套使用，难怪我的索引文件无事发生，k-v的数据文件一直出bug。吃一堑长一智了。（其他博客都没提到这茬，看来以后查资料，还得靠cppreference和源码，博客只能用来查查简单的小问题）。
+
+## fix fflush
+
+又找了一些bug，发现fflush忘写了，赶紧加上。
