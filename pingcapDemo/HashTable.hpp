@@ -66,6 +66,7 @@ private:
         fseek(hashTableFilePtr, fileOffset & (~(blockSize - 1)), SEEK_SET);
 
         fwrite(buffer.get(), elementSize, blockSize, hashTableFilePtr);
+        fflush(hashTableFilePtr);
     }
 
     void GetHashNodeFromFile(const off_t fileOffset, HashTableLinkListNode& node)
@@ -130,6 +131,7 @@ public:
         }
         fseek(hashTableFilePtr, 0, SEEK_SET);
         fwrite(bucket.get(), sizeof(off_t), bucketSize, hashTableFilePtr);
+        fflush(hashTableFilePtr);
     }
 
     HashTable(Reader& inReader, FILE* filePointer)
@@ -145,6 +147,7 @@ public:
         if (len == 0) { 
             memset(bucket.get(), 0xff, sizeof(off_t) * bucketSize);
             fwrite(bucket.get(), sizeof(off_t), bucketSize, hashTableFilePtr);
+            fflush(hashTableFilePtr);
         } else {
             fread(bucket.get(), sizeof(off_t), bucketSize, hashTableFilePtr);
         }
