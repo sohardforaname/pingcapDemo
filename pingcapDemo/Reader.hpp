@@ -51,8 +51,9 @@ private:
 
     char Take() 
     {
-        if (!isEnd)
+        if (!isEnd) {
             return *(fileHeadPointer++);
+        }
         return 0;
     }
 
@@ -65,9 +66,9 @@ private:
 
     void MoveBufferPointer(off_t offset) 
     {
-        fseek(inputStream, offset & (~((bufferSize) - 1)), SEEK_SET);
+        fseek(inputStream, offset & (~(bufferSize - 1)), SEEK_SET);
         ReadBuf();
-        fileHeadPointer = buffer.get() + (offset & ((bufferSize) - 1));
+        fileHeadPointer = buffer.get() + (offset & (bufferSize - 1));
     }
 
     std::string GetRawData() 
@@ -108,7 +109,7 @@ public:
 
     off_t GetOffset() const
     {
-        return (count - 1) * bufferSize + fileHeadPointer - buffer.get() + count - 2 + (count == 1);
+        return (count - 1) * bufferSize + fileHeadPointer - buffer.get();
     }
     
     off_t GetKVCount() const

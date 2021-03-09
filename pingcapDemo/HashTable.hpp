@@ -145,6 +145,7 @@ public:
         off_t len = ftell(hashTableFilePtr);
         fseek(hashTableFilePtr, 0, SEEK_SET);
         if (len == 0) { 
+            // new index file
             memset(bucket.get(), 0xff, sizeof(off_t) * bucketSize);
             fwrite(bucket.get(), sizeof(off_t), bucketSize, hashTableFilePtr);
             fflush(hashTableFilePtr);

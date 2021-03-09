@@ -8,7 +8,7 @@ bool isGenerate;
 
 int main()
 {
-    FILE* filep = fopen("dat", "rt");
+    FILE* filep = fopen("dat", "rb");
     if (!filep) {
         fprintf(stderr, "Data file open failed\n");
         exit(0);
@@ -56,7 +56,7 @@ int main()
 
     auto st = std::chrono::steady_clock::now();
 
-    printf("res: %s\n", hashTable.GetValue(std::string("kstcw")).c_str());
+    printf("res: %s\n", hashTable.GetValue(std::string("cw")).c_str());
 
     auto ed = std::chrono::steady_clock::now();
     printf("per query use: %lld ¦Ìs\n",
